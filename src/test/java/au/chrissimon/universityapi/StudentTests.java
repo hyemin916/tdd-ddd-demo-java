@@ -16,17 +16,22 @@ class StudentTests {
     @LocalServerPort
     private int port;
 
+    private String baseUrl() {
+        return "http://localhost:" + port;
+    }
+
     @Test
     public void givenIAmAStudent_WhenIRegister() {
         final WebTestClient.ResponseSpec response = bindToServer()
-                .baseUrl("http://localhost:" + port)
+                .baseUrl(baseUrl())
                 .build()
                 .post()
                 .uri("/students")
                 .exchange();
 
         itShouldRegisterANewStudent(response);
-        itShouldAllocateANewId(response);
+        final StudentResponse newStudent = itShouldAllocateANewId(response);
+        itShouldShowWhereToLocateNewStudent(response, newStudent);
     }
 
     private void itShouldRegisterANewStudent(final WebTestClient.ResponseSpec response) {
@@ -35,12 +40,20 @@ class StudentTests {
                 .isCreated();
     }
 
-    private void itShouldAllocateANewId(final WebTestClient.ResponseSpec response) {
-        response
+    private StudentResponse itShouldAllocateANewId(final WebTestClient.ResponseSpec response) {
+        return response
                 .expectBody(StudentResponse.class)
                 .value(student -> {
                     assertThat(student.id()).isNotEqualTo(new UUID(0, 0));
                     assertThat(student.id()).isNotNull();
-                });
+                })
+                .returnResult()
+                .getResponseBody();
+    }
+
+    private void itShouldShowWhereToLocateNewStudent(final WebTestClient.ResponseSpec response, final StudentResponse newStudent) {
+        response
+                .expectHeader()
+                .location(baseUrl() + "/students/" + newStudent.id());
     }
 }
