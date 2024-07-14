@@ -11,6 +11,7 @@ public class StudentController {
 
     @PostMapping("/students")
     ResponseEntity<Student> registerNewStudent() {
-        return ResponseEntity.created(null).body(new Student(UUID.randomUUID()));
+        final Student newStudent = Student.register(UUID.randomUUID());
+        return ResponseEntity.created(null).body(newStudent);
     }
 }
