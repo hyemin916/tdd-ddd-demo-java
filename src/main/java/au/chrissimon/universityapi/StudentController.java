@@ -4,11 +4,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.UUID;
+
 @RestController
 public class StudentController {
 
     @PostMapping("/students")
-    ResponseEntity<String> registerNewStudent() {
-        return ResponseEntity.created(null).body("");
+    ResponseEntity<Student> registerNewStudent() {
+        return ResponseEntity.created(null).body(new Student(UUID.randomUUID()));
     }
 }
