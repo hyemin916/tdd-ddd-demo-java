@@ -1,5 +1,6 @@
 package au.chrissimon.universityapi;
 
+import org.assertj.core.api.AbstractStringAssert;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
@@ -22,16 +23,23 @@ class StudentTests {
 
     @Test
     public void givenIAmAStudent_WhenIRegister() {
+        final RegisterStudentRequest studentRequest = new RegisterStudentRequest("Test Student");
         final WebTestClient.ResponseSpec response = bindToServer()
                 .baseUrl(baseUrl())
                 .build()
                 .post()
                 .uri("/students")
+                .bodyValue(studentRequest)
                 .exchange();
 
         itShouldRegisterANewStudent(response);
         final StudentResponse newStudent = itShouldAllocateANewId(response);
         itShouldShowWhereToLocateNewStudent(response, newStudent);
+        itShouldConfirmStudentDetails(newStudent, studentRequest);
+    }
+
+    private AbstractStringAssert<?> itShouldConfirmStudentDetails(final StudentResponse newStudent, final RegisterStudentRequest studentRequest) {
+        return assertThat(newStudent.name()).isEqualTo(studentRequest.name());
     }
 
     private void itShouldRegisterANewStudent(final WebTestClient.ResponseSpec response) {
